@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>革命学堂 - 抗日根据地养成游戏</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red-primary: #C41E3A;
+            --red-dark: #8B0000;
+            --red-deep: #5C0000;
+            --gold-primary: #D4AF37;
+            --gold-light: #F4D03F;
+            --cream: #FDF5E6;
+            --paper: #F5E6C8;
+            --ink: #2C1810;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, var(--red-deep) 0%, var(--red-dark) 50%, #3D0000 100%);
+            min-height: 100vh;
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 25H55L39 37L44 57L30 45L16 57L21 37L5 25H25L30 5Z' fill='rgba(212,175,55,0.03)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 开始界面 */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, var(--red-deep) 0%, var(--red-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .start-screen.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .start-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 4rem;
+            color: var(--gold-primary);
+            text-shadow: 
+                3px 3px 0 var(--red-deep),
+                0 0 30px rgba(212, 175, 55, 0.5);
+            margin-bottom: 20px;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 3px 3px 0 var(--red-deep), 0 0 30px rgba(212, 175, 55, 0.3); }
+            to { text-shadow: 3px 3px 0 var(--red-deep), 0 0 50px rgba(212, 175, 55, 0.7); }
+        }
+
+        .start-subtitle {
+            font-size: 1.5rem;
+            color: var(--cream);
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .star-decoration {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 30px;
+            animation: rotateStar 20s linear infinite;
+        }
+
+        @keyframes rotateStar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .start-story {
+            max-width: 600px;
+            text-align: center;
+            color: var(--paper);
+            line-height: 2;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            border: 2px solid var(--gold-primary);
+        }
+
+        .start-btn {
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            color: var(--red-deep);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+        }
+
+        /* 主游戏界面 */
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 顶部信息栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.8), rgba(92, 0, 0, 0.9), rgba(0,0,0,0.8));
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid var(--gold-primary);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .game-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.8rem;
+            color: var(--gold-primary);
+        }
+
+        .week-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .week-badge {
+            background: var(--gold-primary);
+            color: var(--red-deep);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* 主要游戏区域 */
+        .main-area {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        /* 属性面板 */
+        .stats-panel {
+            background: linear-gradient(180deg, var(--paper) 0%, var(--cream) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid var(--gold-primary);
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.3),
+                inset 0 0 50px rgba(212, 175, 55, 0.1);
+        }
+
+        .stats-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.5rem;
+            color: var(--red-dark);
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--gold-primary);
+        }
+
+        .stat-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.02);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1rem;
+        }
+
+        .stat-name {
+            font-weight: bold;
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--red-dark);
+        }
+
+        .stat-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .political-fill { background: linear-gradient(90deg, #C41E3A, #FF4757); }
+        .military-fill { background: linear-gradient(90deg, #1565c0, #5C9CE5); }
+        .labor-fill { background: linear-gradient(90deg, #2e7d32, #4CAF50); }
+        .mass-fill { background: linear-gradient(90deg, #6a1b9a, #9C27B0); }
+
+        .political-icon { background: #FFE0E0; color: #C41E3A; }
+        .military-icon { background: #E0F0FF; color: #1565c0; }
+        .labor-icon { background: #E0FFE0; color: #2e7d32; }
+        .mass-icon { background: #F0E0FF; color: #6a1b9a; }
+
+        /* 课程选择区 */
+        .courses-area {
+            background: linear-gradient(180deg, var(--paper) 0%, var(--cream) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid var(--gold-primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .courses-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--gold-primary);
+        }
+
+        .courses-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.5rem;
+            color: var(--red-dark);
+        }
+
+        .selection-counter {
+            background: var(--red-dark);
+            color: var(--gold-primary);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .course-category {
+            margin-bottom: 25px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .category-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--ink);
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .course-card {
+            position: relative;
+            padding: 15px 15px 12px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            overflow: hidden;
+            min-height: 90px;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-color, #ddd);
+        }
+
+        .course-card:hover:not(.disabled):not(.selected) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: var(--card-color, var(--gold-primary));
+        }
+
+        .course-card.selected {
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-primary));
+            border-color: var(--gold-primary);
+            transform: scale(0.98);
+        }
+
+        .course-card.selected .course-name {
+            color: var(--red-deep);
+            font-weight: bold;
+        }
+
+        .course-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .course-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #f0f0f0;
+            border-style: dashed;
+        }
+
+        .course-card.locked:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .course-card.locked .course-name {
+            color: #888;
+        }
+
+        .course-card.completed {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        .course-card.political { --card-color: #C41E3A; }
+        .course-card.military { --card-color: #1565c0; }
+        .course-card.labor { --card-color: #2e7d32; }
+        .course-card.mass { --card-color: #6a1b9a; }
+
+        .course-name {
+            font-size: 0.9rem;
+            color: var(--ink);
+            line-height: 1.3;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .course-level {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--gold-primary);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .course-points {
+            display: inline-block;
+            font-size: 0.75rem;
+            color: white;
+            background: var(--card-color, #888);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .course-lock-icon {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-size: 1rem;
+        }
+
+        .course-lock-reasons {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #ccc;
+            font-size: 0.75rem;
+            text-align: left;
+        }
+
+        .lock-reason-item {
+            color: #888;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 1.4;
+        }
+
+        .lock-reason-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .course-card.locked .course-lock-reasons {
+            display: block;
+        }
+
+        .course-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--gold-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--red-deep);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .course-card.selected .course-badge {
+            opacity: 1;
+        }
+
+        .no-courses {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-style: italic;
+            background: rgba(0,0,0,0.03);
+            border-radius: 8px;
+        }
+
+        /* 课程进度条 */
+        .course-progress {
+            margin-top: 8px;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .course-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .course-progress-text {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* 特殊活动样式 */
+        .activity-category {
+            background: linear-gradient(135deg, #f0f8ff, #e6f3ff) !important;
+        }
+
+        .activity-icon {
+            background: #FFE0B2 !important;
+            color: #E65100 !important;
+        }
+
+        .category-hint {
+            font-size: 0.8rem;
+            color: #888;
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        .activity-card {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3) !important;
+            border-color: #FFB74D !important;
+        }
+
+        .activity-card::before {
+            background: #FF9800 !important;
+        }
+
+        .activity-card:hover:not(.selected) {
+            border-color: #FF9800 !important;
+            box-shadow: 0 10px 25px rgba(255, 152, 0, 0.2) !important;
+        }
+
+        .activity-card.selected {
+            background: linear-gradient(135deg, #FFB74D, #FFA726) !important;
+        }
+
+        .activity-icon-large {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .activity-effect {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .activity-effect .positive {
+            color: #2e7d32;
+        }
+
+        .activity-effect .negative {
+            color: #c62828;
+        }
+
+        /* 可重复学习标识 */
+        .course-repeatable {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-size: 0.7rem;
+            color: #888;
+            background: rgba(0,0,0,0.05);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        /* 本周选择确认 */
+        .week-selection {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(196, 30, 58, 0.1);
+            border-radius: 10px;
+            border: 2px solid var(--red-primary);
+        }
+
+        .selection-title {
+            font-weight: bold;
+            color: var(--red-dark);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .selected-courses {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 40px;
+        }
+
+        .selected-tag {
+            padding: 8px 15px;
+            background: var(--gold-primary);
+            color: var(--red-deep);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: tagPop 0.3s ease;
+        }
+
+        @keyframes tagPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .selected-tag .remove-btn {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .selected-tag .remove-btn:hover {
+            opacity: 1;
+        }
+
+        .confirm-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: linear-gradient(135deg, var(--red-dark), var(--red-primary));
+            color: var(--gold-primary);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .confirm-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.4);
+        }
+
+        .confirm-btn:disabled {
+            background: #ccc;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 消息提示区 */
+        .message-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--paper), var(--cream));
+            border-radius: 15px;
+            border: 3px solid var(--gold-primary);
+            min-height: 100px;
+        }
+
+        .message-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.2rem;
+            color: var(--red-dark);
+            margin-bottom: 10px;
+        }
+
+        .message-content {
+            line-height: 1.8;
+            color: var(--ink);
+        }
+
+        /* 事件弹窗 */
+        .event-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .event-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .event-card {
+            background: linear-gradient(180deg, var(--paper), var(--cream));
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            border: 4px solid var(--gold-primary);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .event-modal.show .event-card {
+            transform: scale(1);
+        }
+
+        .event-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: var(--gold-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .event-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.8rem;
+            color: var(--red-dark);
+            margin-bottom: 20px;
+        }
+
+        .event-description {
+            line-height: 1.8;
+            margin-bottom: 25px;
+            color: var(--ink);
+        }
+
+        .event-question {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--red-dark);
+            margin: 20px 0 15px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+
+        .event-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-choice-btn {
+            padding: 15px 20px;
+            font-size: 1rem;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--choice-color, var(--gold-primary));
+        }
+
+        .event-choice-btn:hover {
+            transform: translateX(5px);
+            border-color: var(--choice-color, var(--gold-primary));
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .event-choice-btn.political { --choice-color: #C41E3A; }
+        .event-choice-btn.military { --choice-color: #1565c0; }
+        .event-choice-btn.labor { --choice-color: #2e7d32; }
+        .event-choice-btn.mass { --choice-color: #6a1b9a; }
+        .event-choice-btn.balanced { --choice-color: var(--gold-primary); }
+
+        .choice-text {
+            font-weight: bold;
+            color: var(--ink);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .choice-icon {
+            font-size: 1.2rem;
+        }
+
+        .choice-effect {
+            font-size: 0.85rem;
+            color: #666;
+            padding-left: 28px;
+        }
+
+        .choice-effect span {
+            display: inline-block;
+            background: rgba(0,0,0,0.05);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+
+        .choice-effect .political-effect { color: #C41E3A; }
+        .choice-effect .military-effect { color: #1565c0; }
+        .choice-effect .labor-effect { color: #2e7d32; }
+        .choice-effect .mass-effect { color: #6a1b9a; }
+
+        /* 选择结果弹窗 */
+        .event-result {
+            display: none;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 2px solid var(--gold-primary);
+            animation: resultPop 0.3s ease;
+        }
+
+        @keyframes resultPop {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .event-result.show {
+            display: block;
+        }
+
+        .result-text {
+            color: var(--ink);
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .result-effect {
+            font-weight: bold;
+            color: var(--red-dark);
+            font-size: 1.1rem;
+        }
+
+        .event-continue-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: linear-gradient(135deg, var(--red-dark), var(--red-primary));
+            color: var(--gold-primary);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .event-continue-btn.show {
+            display: inline-block;
+        }
+
+        .event-continue-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 学习总结弹窗 */
+        .summary-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .summary-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .summary-card {
+            background: linear-gradient(180deg, var(--paper), var(--cream));
+            border-radius: 20px;
+            padding: 30px 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 4px solid var(--gold-primary);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transform: scale(0.8) translateY(30px);
+            transition: transform 0.4s ease;
+        }
+
+        .summary-modal.show .summary-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .summary-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--gold-primary);
+        }
+
+        .summary-week-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--red-dark), var(--red-primary));
+            color: var(--gold-primary);
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .summary-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.8rem;
+            color: var(--red-dark);
+        }
+
+        .summary-courses {
+            margin-bottom: 25px;
+        }
+
+        .summary-course-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--gold-primary);
+            animation: slideInRight 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .summary-course-item:nth-child(1) { animation-delay: 0.1s; }
+        .summary-course-item:nth-child(2) { animation-delay: 0.2s; }
+        .summary-course-item:nth-child(3) { animation-delay: 0.3s; }
+        .summary-course-item:nth-child(4) { animation-delay: 0.4s; }
+        .summary-course-item:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .summary-course-item.political { border-left-color: #C41E3A; }
+        .summary-course-item.military { border-left-color: #1565c0; }
+        .summary-course-item.labor { border-left-color: #2e7d32; }
+        .summary-course-item.mass { border-left-color: #6a1b9a; }
+
+        .summary-course-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .summary-course-icon.political { background: #FFE0E0; }
+        .summary-course-icon.military { background: #E0F0FF; }
+        .summary-course-icon.labor { background: #E0FFE0; }
+        .summary-course-icon.mass { background: #F0E0FF; }
+
+        .summary-course-content {
+            flex: 1;
+        }
+
+        .summary-course-name {
+            font-weight: bold;
+            color: var(--ink);
+            margin-bottom: 5px;
+            font-size: 1.05rem;
+        }
+
+        .summary-course-desc {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .summary-course-points {
+            background: var(--gold-primary);
+            color: var(--red-deep);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 20px;
+            background: rgba(196, 30, 58, 0.08);
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .summary-stat {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .summary-stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--red-dark);
+        }
+
+        .summary-stat-change {
+            font-size: 0.9rem;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .summary-stat-change.positive {
+            color: #27ae60;
+        }
+
+        .summary-stat-change.negative {
+            color: #c62828;
+        }
+
+        .activity-effect-summary {
+            color: #e65100 !important;
+        }
+
+        .summary-course-item.activity {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border-left-color: #FF9800;
+        }
+
+        .summary-course-icon.activity {
+            background: #FFE0B2;
+        }
+
+        .summary-stat-name {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .summary-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: linear-gradient(135deg, var(--red-dark), var(--red-primary));
+            color: var(--gold-primary);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .summary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 30, 58, 0.4);
+        }
+
+        /* 结局界面 */
+        .ending-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, var(--red-deep) 0%, #1a0000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .ending-screen.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .ending-badge {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 
+                0 0 30px rgba(212, 175, 55, 0.5),
+                0 0 60px rgba(212, 175, 55, 0.3);
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.5), 0 0 60px rgba(212, 175, 55, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(212, 175, 55, 0.7), 0 0 100px rgba(212, 175, 55, 0.5); }
+        }
+
+        .ending-badge-icon {
+            font-size: 4rem;
+        }
+
+        .ending-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 2rem;
+            color: var(--cream);
+            margin-bottom: 15px;
+        }
+
+        .ending-identity {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 3rem;
+            color: var(--gold-primary);
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .ending-description {
+            max-width: 600px;
+            text-align: center;
+            color: var(--cream);
+            line-height: 2;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            border: 2px solid var(--gold-primary);
+        }
+
+        .final-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .final-stat {
+            background: rgba(255,255,255,0.1);
+            padding: 20px 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--gold-primary);
+        }
+
+        .final-stat-value {
+            font-size: 2.5rem;
+            color: var(--gold-primary);
+            font-weight: bold;
+        }
+
+        .final-stat-name {
+            color: var(--cream);
+            margin-top: 5px;
+        }
+
+        .restart-btn {
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            color: var(--red-deep);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .main-area {
+                grid-template-columns: 1fr;
+            }
+
+            .start-title {
+                font-size: 2.5rem;
+            }
+
+            .courses-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--red-deep);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-star {
+            width: 100px;
+            height: 100px;
+            animation: loadingSpin 1s linear infinite;
+        }
+
+        @keyframes loadingSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载界面 -->
+    <div class="loading-overlay" id="loading">
+        <svg class="loading-star" viewBox="0 0 100 100">
+            <polygon points="50,5 61,40 98,40 68,62 79,97 50,75 21,97 32,62 2,40 39,40" fill="#D4AF37"/>
+        </svg>
+    </div>
+
+    <!-- 开始界面 -->
+    <div class="start-screen" id="startScreen">
+        <svg class="star-decoration" viewBox="0 0 100 100">
+            <polygon points="50,5 61,40 98,40 68,62 79,97 50,75 21,97 32,62 2,40 39,40" fill="#D4AF37"/>
+        </svg>
+        <h1 class="start-title">革命学堂</h1>
+        <p class="start-subtitle">抗日根据地学习养成游戏</p>
+        <div class="start-story">
+            <p>1938年，战火纷飞的年代。</p>
+            <p>你作为一名热血青年，来到了抗日根据地的革命学校。</p>
+            <p>在这里，你将度过8周的紧张学习生活。</p>
+            <p>每周选择5门课程，有些高级课程需要先修基础课程。</p>
+            <p>你的选择将决定你最终成为什么样的革命战士！</p>
+        </div>
+        <button class="start-btn" onclick="startGame()">开始学习</button>
+    </div>
+
+    <!-- 主游戏界面 -->
+    <div class="game-container" id="gameContainer">
+        <!-- 顶部信息栏 -->
+        <div class="top-bar">
+            <h1 class="game-title">⭐ 革命学堂 ⭐</h1>
+            <div class="week-display">
+                <div class="week-badge">第 <span id="currentWeek">1</span> 周 / 8周</div>
+                <svg class="progress-ring" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="5"/>
+                    <circle id="progressCircle" class="progress-ring-circle" cx="30" cy="30" r="25" fill="none" stroke="#D4AF37" stroke-width="5" stroke-dasharray="157" stroke-dashoffset="157"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <!-- 属性面板 -->
+            <div class="stats-panel">
+                <h2 class="stats-title">📊 能力属性</h2>
+                
+                <div class="stat-item">
+                    <div class="stat-header">
+                        <span class="stat-icon political-icon">📕</span>
+                        <span class="stat-name">政治素养</span>
+                        <span class="stat-value" id="politicalValue">10</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill political-fill" id="politicalBar" style="width: 10%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-header">
+                        <span class="stat-icon military-icon">⚔️</span>
+                        <span class="stat-name">军事能力</span>
+                        <span class="stat-value" id="militaryValue">10</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill military-fill" id="militaryBar" style="width: 10%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-header">
+                        <span class="stat-icon labor-icon">🔨</span>
+                        <span class="stat-name">劳动技能</span>
+                        <span class="stat-value" id="laborValue">10</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill labor-fill" id="laborBar" style="width: 10%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-header">
+                        <span class="stat-icon mass-icon">👥</span>
+                        <span class="stat-name">群众工作</span>
+                        <span class="stat-value" id="massValue">10</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill mass-fill" id="massBar" style="width: 10%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 课程选择区 -->
+            <div class="courses-area">
+                <div class="courses-header">
+                    <h2 class="courses-title">📚 课程选择</h2>
+                    <div class="selection-counter">已选 <span id="selectionCount">0</span> / 5 项（可少选）</div>
+                </div>
+
+                <!-- 政治教育 -->
+                <div class="course-category">
+                    <div class="category-header">
+                        <div class="category-icon political-icon">📕</div>
+                        <span class="category-title">革命的政治教育</span>
+                    </div>
+                    <div class="courses-grid" id="politicalCourses"></div>
+                </div>
+
+                <!-- 民众运动 -->
+                <div class="course-category">
+                    <div class="category-header">
+                        <div class="category-icon mass-icon">👥</div>
+                        <span class="category-title">民众运动和政府工作教育</span>
+                    </div>
+                    <div class="courses-grid" id="massCourses"></div>
+                </div>
+
+                <!-- 军事教育 -->
+                <div class="course-category">
+                    <div class="category-header">
+                        <div class="category-icon military-icon">⚔️</div>
+                        <span class="category-title">军事教育</span>
+                    </div>
+                    <div class="courses-grid" id="militaryCourses"></div>
+                </div>
+
+                <!-- 劳动教育 -->
+                <div class="course-category">
+                    <div class="category-header">
+                        <div class="category-icon labor-icon">🔨</div>
+                        <span class="category-title">劳动教育</span>
+                    </div>
+                    <div class="courses-grid" id="laborCourses"></div>
+                </div>
+
+                <!-- 特殊活动 -->
+                <div class="course-category activity-category">
+                    <div class="category-header">
+                        <div class="category-icon activity-icon">🎯</div>
+                        <span class="category-title">课余活动</span>
+                        <span class="category-hint">（可选，会影响属性）</span>
+                    </div>
+                    <div class="courses-grid" id="specialActivities"></div>
+                </div>
+
+                <!-- 本周选择 -->
+                <div class="week-selection">
+                    <div class="selection-title">📋 本周课程安排：</div>
+                    <div class="selected-courses" id="selectedCourses"></div>
+                    <button class="confirm-btn" id="confirmBtn" onclick="confirmWeek()" disabled>确认本周课程</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 消息区 -->
+        <div class="message-area">
+            <div class="message-title">📜 学习日志</div>
+            <div class="message-content" id="messageContent">欢迎来到革命学堂！请选择本周要学习的5门课程。每门课程都会提升你相应的能力属性。</div>
+        </div>
+    </div>
+
+    <!-- 学习总结弹窗 -->
+    <div class="summary-modal" id="summaryModal">
+        <div class="summary-card">
+            <div class="summary-header">
+                <div class="summary-week-badge" id="summaryWeekBadge">第 1 周</div>
+                <h3 class="summary-title">📜 本周学习总结</h3>
+            </div>
+            <div class="summary-courses" id="summaryCourses">
+                <!-- 课程列表将通过JS动态添加 -->
+            </div>
+            <div class="summary-stats" id="summaryStats">
+                <!-- 属性变化将通过JS动态添加 -->
+            </div>
+            <button class="summary-btn" onclick="closeSummary()">继续下一周 →</button>
+        </div>
+    </div>
+
+    <!-- 事件弹窗 -->
+    <div class="event-modal" id="eventModal">
+        <div class="event-card">
+            <div class="event-icon" id="eventIcon">📢</div>
+            <h3 class="event-title" id="eventTitle">特别事件</h3>
+            <p class="event-description" id="eventDescription"></p>
+            <div class="event-question" id="eventQuestion">你会怎么做？</div>
+            <div class="event-choices" id="eventChoices">
+                <!-- 选项将通过JS动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 结局界面 -->
+    <div class="ending-screen" id="endingScreen">
+        <div class="ending-badge">
+            <span class="ending-badge-icon" id="endingIcon">🎓</span>
+        </div>
+        <h2 class="ending-title">学期结束！你的最终评价是：</h2>
+        <div class="ending-identity" id="endingIdentity"></div>
+        <div class="ending-description" id="endingDescription"></div>
+        <div class="final-stats" id="finalStats"></div>
+        <button class="restart-btn" onclick="restartGame()">重新开始</button>
+    </div>
+
+    <script>
+        // 课程数据（带多种解锁条件）
+        // prerequisites: 需要先学过的课程ID数组
+        // requiredWeek: 需要到达第几周才开放
+        // requiredTimes: 需要学习几次才能完全掌握（默认1次）
+        const allCourses = {
+            political: [
+                // 基础课程（无前置）
+                { id: "p1", name: "社会科学概论", type: "political", points: 3, description: "学习了社会结构的基本原理，理解了社会发展的规律。", prerequisites: [], level: 1, requiredTimes: 2 },
+                { id: "p2", name: "中国革命运动史", type: "political", points: 3, description: "了解了革命先辈的奋斗历程，更加坚定了革命信念。", prerequisites: [], level: 1, requiredTimes: 2 },
+                { id: "p3", name: "时事政治报告", type: "political", points: 2, description: "及时了解当前政治动态，学会了将理论与现实相结合。", prerequisites: [], level: 1 },
+                { id: "p4", name: "三民主义研究", type: "political", points: 2, description: "理解了孙中山的思想，认识了旧民主主义革命的局限性。", prerequisites: [], requiredWeek: 2, level: 1 },
+                // 进阶课程
+                { id: "p5", name: "抗日民族统一战线", type: "political", points: 4, description: "认识到团结一切可以团结的力量的重要性，民族大义高于一切。", prerequisites: ["p2"], level: 2 },
+                { id: "p6", name: "政治经济学", type: "political", points: 3, description: "揭示了经济基础与上层建筑的关系，理解了生产关系对社会的决定性作用。", prerequisites: ["p1"], level: 2, requiredTimes: 2 },
+                { id: "p7", name: "辩证唯物主义", type: "political", points: 4, description: "学会用发展的眼光看问题，明白了事物发展的内在规律。", prerequisites: ["p1"], requiredWeek: 2, level: 2, requiredTimes: 2 },
+                { id: "p8", name: "世界革命运动史", type: "political", points: 3, description: "了解了国际共运的历程，明白了中国革命是世界革命的一部分。", prerequisites: ["p2"], level: 2 },
+                { id: "p9", name: "中国问题", type: "political", points: 4, description: "深入了解了中国的国情和挑战，明白了中国革命的特殊性。", prerequisites: ["p2", "p4"], level: 2 },
+                // 高级课程
+                { id: "p10", name: "马列主义", type: "political", points: 5, description: "掌握了科学的世界观和方法论，看清了历史发展方向。", prerequisites: ["p6", "p7"], requiredWeek: 4, level: 3, requiredTimes: 3 },
+                { id: "p11", name: "科学社会主义", type: "political", points: 4, description: "对社会主义必然胜利充满信心，理解了社会主义取代资本主义的历史必然性。", prerequisites: ["p7", "p8"], requiredWeek: 4, level: 3 },
+                { id: "p12", name: "世界政治", type: "political", points: 3, description: "了解了国际格局的变化，明白了中国在国际舞台上的地位和作用。", prerequisites: ["p8"], requiredWeek: 3, level: 3 },
+                { id: "p13", name: "战区政治工作", type: "political", points: 4, description: "学会了如何在战时开展政治工作，明白了政治工作对军事胜利的重要性。", prerequisites: ["p5", "p9"], requiredWeek: 5, level: 3 },
+                { id: "p14", name: "党课", type: "political", points: 5, description: "强化了党性修养，明白了共产党员的使命和责任。", prerequisites: ["p10"], requiredWeek: 6, level: 4, requiredTimes: 2 }
+            ],
+            mass: [
+                { id: "m1", name: "社会实践", type: "mass", points: 3, description: "深入群众了解他们的需求，锻炼了解决实际问题的能力。", prerequisites: [], level: 1, requiredTimes: 2 },
+                { id: "m2", name: "民众运动的理论和经验", type: "mass", points: 4, description: "学会了如何发动和组织群众，明白了只有依靠群众才能取得革命胜利。", prerequisites: ["m1"], requiredWeek: 3, level: 2 },
+                { id: "m3", name: "建立敌后抗日根据地政权的理论和政策", type: "mass", points: 5, description: "了解了根据地政权建设的原则，掌握了政策制定的方法。", prerequisites: ["m2", "p5"], requiredWeek: 5, level: 3 }
+            ],
+            military: [
+                { id: "mi1", name: "军事训练", type: "military", points: 3, description: "锻炼了体能和军事技能，培养了军人应有的纪律和作风。", prerequisites: [], level: 1, requiredTimes: 3 },
+                { id: "mi2", name: "军事生活管理", type: "military", points: 2, description: "学会了如何管理部队日常生活，明白了日常管理对部队战斗力的重要性。", prerequisites: [], level: 1 },
+                { id: "mi3", name: "步兵战术", type: "military", points: 4, description: "了解了基本战术动作和队形，能够指挥步兵班组作战。", prerequisites: ["mi1"], requiredWeek: 2, level: 2, requiredTimes: 2 },
+                { id: "mi4", name: "游击战争", type: "military", points: 5, description: "掌握了灵活机动的战术，以弱胜强的战法。", prerequisites: ["mi3"], requiredWeek: 4, level: 3, requiredTimes: 2 },
+                { id: "mi5", name: "特种战斗教育", type: "military", points: 4, description: "学会了执行特殊任务的方法，掌握了侦察、破坏等技能。", prerequisites: ["mi3"], requiredWeek: 5, level: 3 }
+            ],
+            labor: [
+                { id: "l1", name: "建校劳动", type: "labor", points: 3, description: "掌握了基本建设技能，学会了修建工事和房屋。", prerequisites: [], level: 1, requiredTimes: 2 },
+                { id: "l2", name: "农业生产劳动", type: "labor", points: 4, description: "学会了耕种和收获，体会到了劳动的艰辛与光荣。", prerequisites: [], level: 1, requiredTimes: 2 }
+            ]
+        };
+
+        // 特殊活动（休息、娱乐等）
+        const specialActivities = [
+            { id: "rest", name: "休息", icon: "😴", type: "rest", effect: { political: -1, military: -1 }, description: "好好休息了一下，恢复了精力，但学习进度有所落后。" },
+            { id: "play", name: "玩耍", icon: "🎮", type: "play", effect: { political: -2, labor: -1 }, description: "和同学们一起玩耍，放松了心情，但耽误了一些学习时间。" },
+            { id: "chat", name: "闲聊", icon: "💬", type: "chat", effect: { mass: 2, political: -1 }, description: "与同学们闲聊交流，增进了感情，但分散了学习精力。" },
+            { id: "exercise", name: "自由锻炼", icon: "🏃", type: "exercise", effect: { military: 2, political: -1 }, description: "进行了额外的体能锻炼，增强了体质。" },
+            { id: "read", name: "课外阅读", icon: "📖", type: "read", effect: { political: 2, military: -1 }, description: "阅读了一些课外书籍，拓宽了视野。" },
+            { id: "help", name: "帮助同学", icon: "🤝", type: "help", effect: { mass: 3, labor: -1 }, description: "帮助同学解决困难，建立了深厚的友谊。" }
+        ];
+
+        // 每周课程安排：每个类型都展示5门课程
+        // 格式: { political: 数量, mass: 数量, military: 数量, labor: 数量 }
+        const weeklySchedule = [
+            { week: 1, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "入学第一周" },
+            { week: 2, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "基础学习" },
+            { week: 3, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "理论深化" },
+            { week: 4, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "军政结合" },
+            { week: 5, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "思想提升" },
+            { week: 6, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "实战准备" },
+            { week: 7, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "综合训练" },
+            { week: 8, courses: { political: 5, mass: 5, military: 5, labor: 5 }, theme: "毕业冲刺" }
+        ];
+
+        // 随机事件（带选择）
+        const randomEvents = [
+            {
+                title: "敌机空袭",
+                icon: "✈️",
+                description: "敌机来袭！警报声响彻校园，师生们开始转移。在这紧急时刻，你需要做出选择...",
+                choices: [
+                    { text: "冲在前面组织撤离", icon: "🏃", type: "military", effect: { military: 5 }, result: "你冷静指挥，帮助同学们有序撤离到防空洞，展现了出色的军事素养。" },
+                    { text: "帮助行动不便的同学", icon: "🤝", type: "mass", effect: { mass: 4, military: 1 }, result: "你背起受伤的同学，安全转移到防空洞，大家都很感激你的帮助。" },
+                    { text: "收集重要学习资料", icon: "📚", type: "political", effect: { political: 4 }, result: "你冒险抢救出重要的革命文献，这些资料对继续学习至关重要。" }
+                ]
+            },
+            {
+                title: "生产竞赛",
+                icon: "🌾",
+                description: "学校组织开展大生产运动，各班都在积极参与。你打算怎么参加？",
+                choices: [
+                    { text: "埋头苦干开荒种地", icon: "🔨", type: "labor", effect: { labor: 5 }, result: "你挥汗如雨，开垦了大片荒地，成为劳动标兵。" },
+                    { text: "组织同学分工合作", icon: "👥", type: "mass", effect: { mass: 4, labor: 2 }, result: "你合理分配任务，带领大家高效完成生产任务，展现了组织才能。" },
+                    { text: "研究改进耕作方法", icon: "💡", type: "political", effect: { political: 3, labor: 2 }, result: "你改良了耕作技术，提高了生产效率，理论联系实际。" }
+                ]
+            },
+            {
+                title: "群众来访",
+                icon: "🎁",
+                description: "附近村庄的群众来学校慰问，送来了自己种的蔬菜和鸡蛋。校长让你代表学生接待他们。",
+                choices: [
+                    { text: "热情接待并了解群众需求", icon: "🤝", type: "mass", effect: { mass: 5 }, result: "你详细询问村民的困难，记录下他们的需求，准备组织同学帮助他们。" },
+                    { text: "向群众宣讲革命道理", icon: "📖", type: "political", effect: { political: 4, mass: 1 }, result: "你向村民讲解抗战形势和党的政策，他们听后深受鼓舞。" },
+                    { text: "邀请群众参观学校建设", icon: "🏫", type: "labor", effect: { labor: 3, mass: 2 }, result: "你带领村民参观学校，展示了师生们的建设成果，增进了军民感情。" }
+                ]
+            },
+            {
+                title: "理论学习会",
+                icon: "📖",
+                description: "学校组织了一次重要的理论学习会，讨论当前抗战形势和革命策略。会上征求大家的意见。",
+                choices: [
+                    { text: "积极发言阐述自己观点", icon: "💬", type: "political", effect: { political: 5 }, result: "你的发言观点深刻，得到了老师的表扬，被推举为学习小组组长。" },
+                    { text: "结合军事实践分析问题", icon: "⚔️", type: "military", effect: { military: 3, political: 2 }, result: "你从军事角度分析了游击战术的运用，让同学们耳目一新。" },
+                    { text: "联系群众工作分享经验", icon: "👥", type: "mass", effect: { mass: 3, political: 2 }, result: "你分享了与群众交往的心得，强调了群众路线的重要性。" }
+                ]
+            },
+            {
+                title: "紧急情报",
+                icon: "🎯",
+                description: "收到情报，敌人可能要来袭击学校。校长紧急召集大家商议对策，你认为应该...",
+                choices: [
+                    { text: "主动请缨参加侦察", icon: "🔭", type: "military", effect: { military: 5 }, result: "你带领小队深入敌后侦察，成功摸清了敌人的动向。" },
+                    { text: "组织群众转移物资", icon: "📦", type: "mass", effect: { mass: 4, labor: 2 }, result: "你发动周围群众帮忙，迅速将学校物资转移到安全地点。" },
+                    { text: "布置防御工事", icon: "🔨", type: "labor", effect: { labor: 4, military: 2 }, result: "你带领同学们修建防御工事，为学校构筑了坚固的防线。" }
+                ]
+            },
+            {
+                title: "村民求助",
+                icon: "🆘",
+                description: "附近村庄遭遇困难，庄稼急需抢收，村民希望学校能派人帮忙。你决定...",
+                choices: [
+                    { text: "亲自下地帮忙收割", icon: "🌾", type: "labor", effect: { labor: 5 }, result: "你挥舞镰刀，一天就帮村民收割了三亩地，累得满头大汗但很充实。" },
+                    { text: "组织同学轮流支援", icon: "👥", type: "mass", effect: { mass: 5 }, result: "你制定了详细的支援计划，组织同学们轮流帮忙，村民非常感激。" },
+                    { text: "向村民传授农业知识", icon: "📚", type: "political", effect: { political: 3, labor: 2 }, result: "你向村民介绍了科学种田的方法，帮助他们提高了耕作效率。" }
+                ]
+            },
+            {
+                title: "夜间警报",
+                icon: "🌙",
+                description: "深夜，值班的你发现了可疑动静。你会怎么处理？",
+                choices: [
+                    { text: "独自前去侦察情况", icon: "🔦", type: "military", effect: { military: 5 }, result: "你悄悄接近查看，发现是野猪在活动，虚惊一场，但你的警觉性得到了肯定。" },
+                    { text: "立即报告并组织警戒", icon: "📢", type: "political", effect: { political: 4, military: 1 }, result: "你迅速报告情况，按程序组织警戒，展现了良好的纪律性。" },
+                    { text: "叫醒同学一起查看", icon: "🤝", type: "mass", effect: { mass: 3, military: 2 }, result: "你叫醒几个同学一起行动，大家相互配合，安全处理了情况。" }
+                ]
+            },
+            {
+                title: "文艺晚会",
+                icon: "🎭",
+                description: "学校要举办文艺晚会，鼓舞士气。你打算怎么参与？",
+                choices: [
+                    { text: "表演革命歌曲", icon: "🎵", type: "political", effect: { political: 4, mass: 1 }, result: "你演唱的《义勇军进行曲》激昂有力，台下掌声雷动。" },
+                    { text: "组织搭建舞台", icon: "🔨", type: "labor", effect: { labor: 4, mass: 1 }, result: "你带领同学们搭建了漂亮的舞台，大家都称赞你的手艺。" },
+                    { text: "动员群众一起参加", icon: "👥", type: "mass", effect: { mass: 5 }, result: "你邀请了附近村民来观看，晚会气氛热烈，军民同乐。" }
+                ]
+            },
+            {
+                title: "物资紧缺",
+                icon: "📦",
+                description: "学校物资紧缺，需要想办法解决。你觉得应该...",
+                choices: [
+                    { text: "组织开荒自给自足", icon: "🌱", type: "labor", effect: { labor: 5 }, result: "你带领同学们开垦菜地，种上了各种蔬菜，部分解决了吃菜问题。" },
+                    { text: "联系群众交换物资", icon: "🤝", type: "mass", effect: { mass: 4, labor: 1 }, result: "你联系附近村民以劳动换取物资，建立了互助关系。" },
+                    { text: "研究节约使用方案", icon: "📋", type: "political", effect: { political: 4, labor: 1 }, result: "你制定了详细的物资使用计划，合理分配，杜绝浪费。" }
+                ]
+            },
+            {
+                title: "新同学入学",
+                icon: "🎒",
+                description: "一批新同学刚入学，对学校生活还不适应。作为老学员，你打算...",
+                choices: [
+                    { text: "讲解学校规章制度", icon: "📖", type: "political", effect: { political: 4, mass: 1 }, result: "你详细介绍了学校的历史和制度，帮助新同学快速了解学校。" },
+                    { text: "带他们熟悉校园环境", icon: "🚶", type: "mass", effect: { mass: 5 }, result: "你热情地带领新同学参观校园，大家很快就熟悉起来了。" },
+                    { text: "教他们基本军事动作", icon: "⚔️", type: "military", effect: { military: 4, mass: 1 }, result: "你教新同学站军姿、齐步走，他们学得很认真。" }
+                ]
+            }
+        ];
+
+        // 结局定义
+        const endings = {
+            political: {
+                icon: "📕",
+                title: "革命理论家",
+                description: "经过16周的刻苦学习，你在政治理论方面展现出了卓越的才能。你深刻理解马列主义基本原理，能够运用科学的世界观分析问题。毕业后，你被分配到根据地的党校任教，为培养更多革命干部贡献力量。你的理论文章在《解放日报》上发表，影响了无数革命青年。"
+            },
+            military: {
+                icon: "⚔️",
+                title: "抗日英雄",
+                description: "经过16周的严格训练，你成为了一名出色的军事人才。你精通游击战术，作战勇猛果敢。毕业后，你加入了八路军某部队，参与了多次重要战役。你带领的小分队多次深入敌后，给日寇以沉重打击，被战士们亲切地称为'神枪手'。"
+            },
+            labor: {
+                icon: "🔨",
+                title: "劳动模范",
+                description: "经过16周的实践锻炼，你成为了生产战线上的模范。你掌握了精湛的劳动技能，在大生产运动中表现突出。毕业后，你留在根据地指导农业生产，研究改良耕作方法，帮助根据地实现粮食自给。你被评为'劳动英雄'，事迹传遍整个边区。"
+            },
+            mass: {
+                icon: "👥",
+                title: "群众领袖",
+                description: "经过16周的学习实践，你成为了杰出的群众工作者。你深入群众，了解民情，善于发动和组织群众。毕业后，你被派往新解放区开展工作，成功建立了基层政权组织。在你的努力下，当地群众积极支持抗战，踊跃参军，成为坚强的抗日堡垒。"
+            },
+            balanced: {
+                icon: "🌟",
+                title: "全能干部",
+                description: "经过16周的全面学习，你在各方面都取得了均衡的发展。你既懂理论又能实践，既能打仗又能生产，还善于做群众工作。这样的全能人才正是根据地急需的！毕业后，你被委以重任，成为基层根据地的负责人，带领当地军民开展抗日斗争和生产建设。"
+            }
+        };
+
+        // 游戏状态
+        let gameState = {
+            week: 1,
+            maxWeeks: 8,
+            maxSelectionsPerWeek: 5, // 每周最多选择数
+            stats: {
+                political: 10,
+                military: 10,
+                labor: 10,
+                mass: 10
+            },
+            maxStat: 100,
+            minStat: 0,
+            selectedItems: [], // 本周选择的项目（课程+活动）
+            completedCourseIds: [], // 已完全掌握的课程ID
+            courseProgress: {}, // 课程学习进度 { courseId: 已学次数 }
+            pendingRandomEvent: false,
+            weeklyAvailableCourses: [] // 本周可选课程
+        };
+
+        // 初始化游戏
+        function initGame() {
+            // 隐藏加载界面
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 1000);
+
+            // 生成本周课程
+            generateWeeklyCourses();
+            // 初始化课程卡片
+            renderCourses();
+            updateUI();
+        }
+
+        // 属性名称映射
+        const statNames = {
+            political: '政治素养',
+            military: '军事能力',
+            labor: '劳动技能',
+            mass: '群众工作'
+        };
+
+        // 检查课程是否可以学习（多种条件）
+        function canLearnCourse(course) {
+            const reasons = [];
+            
+            // 1. 检查周数要求
+            if (course.requiredWeek && gameState.week < course.requiredWeek) {
+                reasons.push({
+                    type: 'week',
+                    icon: '📅',
+                    text: `第${course.requiredWeek}周开放`,
+                    met: false
+                });
+            }
+            
+            // 2. 检查属性要求
+            if (course.requiredStats) {
+                Object.entries(course.requiredStats).forEach(([stat, value]) => {
+                    if (gameState.stats[stat] < value) {
+                        reasons.push({
+                            type: 'stat',
+                            icon: stat === 'political' ? '📕' : stat === 'military' ? '⚔️' : stat === 'labor' ? '🔨' : '👥',
+                            text: `${statNames[stat]}≥${value}`,
+                            current: gameState.stats[stat],
+                            required: value,
+                            met: false
+                        });
+                    }
+                });
+            }
+            
+            // 3. 检查前置课程
+            if (course.prerequisites && course.prerequisites.length > 0) {
+                const missingPrereqs = course.prerequisites.filter(prereqId => 
+                    !gameState.completedCourseIds.includes(prereqId)
+                );
+                
+                if (missingPrereqs.length > 0) {
+                    const missingNames = missingPrereqs.map(prereqId => {
+                        for (const type of Object.keys(allCourses)) {
+                            const found = allCourses[type].find(c => c.id === prereqId);
+                            if (found) return found.name;
+                        }
+                        return prereqId;
+                    });
+                    reasons.push({
+                        type: 'prereq',
+                        icon: '📚',
+                        text: `需先学: ${missingNames.join('、')}`,
+                        met: false
+                    });
+                }
+            }
+            
+            if (reasons.length === 0) {
+                return { canLearn: true, reasons: [] };
+            }
+            
+            return { canLearn: false, reasons: reasons };
+        }
+
+        // 生成解锁条件的HTML
+        function generateLockReasonHTML(reasons) {
+            if (!reasons || reasons.length === 0) return '';
+            
+            return reasons.map(r => {
+                let detail = '';
+                if (r.type === 'stat' && r.current !== undefined) {
+                    detail = ` (当前: ${r.current})`;
+                }
+                return `<div class="lock-reason-item">${r.icon} ${r.text}${detail}</div>`;
+            }).join('');
+        }
+
+        // 生成本周可选课程
+        function generateWeeklyCourses() {
+            const schedule = weeklySchedule[gameState.week - 1];
+            if (!schedule) return;
+
+            gameState.weeklyAvailableCourses = [];
+
+            Object.keys(schedule.courses).forEach(type => {
+                const count = schedule.courses[type];
+                if (count === 0) return;
+
+                // 获取该类型所有未完全掌握的课程
+                const availableCourses = allCourses[type].filter(course => 
+                    !gameState.completedCourseIds.includes(course.id)
+                );
+
+                // 按level排序，优先显示低级别课程
+                // 正在学习中的课程（有进度但未完成）优先显示
+                availableCourses.sort((a, b) => {
+                    const aProgress = gameState.courseProgress[a.id] || 0;
+                    const bProgress = gameState.courseProgress[b.id] || 0;
+                    // 有进度的课程优先
+                    if (aProgress > 0 && bProgress === 0) return -1;
+                    if (bProgress > 0 && aProgress === 0) return 1;
+                    // 然后按级别排序
+                    return a.level - b.level;
+                });
+
+                // 选择指定数量的课程
+                const selectedCourses = availableCourses.slice(0, count);
+                
+                selectedCourses.forEach(course => {
+                    gameState.weeklyAvailableCourses.push({
+                        ...course,
+                        type: type
+                    });
+                });
+            });
+        }
+
+        // 渲染课程卡片
+        function renderCourses() {
+            const containers = {
+                political: document.getElementById('politicalCourses'),
+                mass: document.getElementById('massCourses'),
+                military: document.getElementById('militaryCourses'),
+                labor: document.getElementById('laborCourses')
+            };
+
+            // 清空容器
+            Object.values(containers).forEach(c => c.innerHTML = '');
+
+            // 按类型分组渲染
+            gameState.weeklyAvailableCourses.forEach(course => {
+                const container = containers[course.type];
+                if (!container) return;
+
+                const { canLearn, reasons } = canLearnCourse(course);
+                const isCompleted = gameState.completedCourseIds.includes(course.id);
+                
+                const card = document.createElement('div');
+                card.className = `course-card ${course.type}`;
+                card.dataset.id = course.id;
+                card.dataset.type = course.type;
+                card.dataset.itemType = 'course';
+                
+                if (!canLearn) {
+                    card.classList.add('locked');
+                }
+                if (isCompleted) {
+                    card.classList.add('completed');
+                }
+
+                const levelStars = '★'.repeat(course.level) + '☆'.repeat(4 - course.level);
+                const lockReasonsHTML = !canLearn ? generateLockReasonHTML(reasons) : '';
+                
+                // 计算学习进度
+                const requiredTimes = course.requiredTimes || 1;
+                const currentProgress = gameState.courseProgress[course.id] || 0;
+                const progressPercent = (currentProgress / requiredTimes) * 100;
+                const progressHTML = requiredTimes > 1 ? `
+                    <div class="course-progress">
+                        <div class="course-progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="course-progress-text">进度: ${currentProgress}/${requiredTimes}</div>
+                ` : '';
+                
+                card.innerHTML = `
+                    <span class="course-name">${course.name}</span>
+                    <span class="course-level">${levelStars}</span>
+                    <span class="course-points">+${course.points}</span>
+                    ${requiredTimes > 1 && !isCompleted ? `<span class="course-repeatable">需学${requiredTimes}次</span>` : ''}
+                    ${progressHTML}
+                    ${!canLearn ? `<span class="course-lock-icon">🔒</span>` : ''}
+                    ${!canLearn ? `<div class="course-lock-reasons">${lockReasonsHTML}</div>` : ''}
+                    <span class="course-badge">✓</span>
+                `;
+                
+                if (canLearn && !isCompleted) {
+                    card.onclick = () => toggleCourse(course, card);
+                } else if (!canLearn) {
+                    card.onclick = () => showMessage(`🔒 【${course.name}】暂时无法学习\n\n解锁条件：\n${reasons.map(r => `${r.icon} ${r.text}${r.current !== undefined ? ` (当前: ${r.current})` : ''}`).join('\n')}`);
+                }
+                
+                container.appendChild(card);
+            });
+
+            // 如果某个类型没有课程，显示提示
+            Object.keys(containers).forEach(type => {
+                const container = containers[type];
+                if (container.children.length === 0) {
+                    container.innerHTML = '<div class="no-courses">本周暂无此类课程安排</div>';
+                }
+            });
+
+            // 渲染特殊活动
+            renderSpecialActivities();
+
+            // 更新周主题
+            const schedule = weeklySchedule[gameState.week - 1];
+            if (schedule) {
+                showMessage(`📚 第${gameState.week}周 - ${schedule.theme}。最多选5项（可少选），部分课程需要多次学习才能完全掌握。`);
+            }
+        }
+
+        // 渲染特殊活动
+        function renderSpecialActivities() {
+            const container = document.getElementById('specialActivities');
+            if (!container) return;
+            container.innerHTML = '';
+
+            specialActivities.forEach(activity => {
+                const card = document.createElement('div');
+                card.className = 'course-card activity-card';
+                card.dataset.id = activity.id;
+                card.dataset.itemType = 'activity';
+
+                // 生成效果描述
+                const effectHTML = Object.entries(activity.effect).map(([stat, value]) => {
+                    const statName = statNames[stat] || stat;
+                    const className = value > 0 ? 'positive' : 'negative';
+                    const sign = value > 0 ? '+' : '';
+                    return `<span class="${className}">${statName}${sign}${value}</span>`;
+                }).join(' ');
+
+                card.innerHTML = `
+                    <div class="activity-icon-large">${activity.icon}</div>
+                    <span class="course-name">${activity.name}</span>
+                    <div class="activity-effect">${effectHTML}</div>
+                    <span class="course-badge">✓</span>
+                `;
+
+                card.onclick = () => toggleActivity(activity, card);
+                container.appendChild(card);
+            });
+        }
+
+        // 切换活动选择
+        function toggleActivity(activity, card) {
+            if (card.classList.contains('selected')) {
+                // 取消选择
+                card.classList.remove('selected');
+                gameState.selectedItems = gameState.selectedItems.filter(item => item.id !== activity.id);
+            } else {
+                // 检查是否已选满
+                if (gameState.selectedItems.length >= gameState.maxSelectionsPerWeek) {
+                    showMessage("⚠️ 本周已选满5项，请先取消部分选择。");
+                    return;
+                }
+                // 添加选择
+                card.classList.add('selected');
+                gameState.selectedItems.push({
+                    id: activity.id,
+                    type: activity.type,
+                    name: activity.name,
+                    icon: activity.icon,
+                    effect: activity.effect,
+                    description: activity.description,
+                    itemType: 'activity'
+                });
+            }
+
+            updateSelectionUI();
+        }
+
+        // 切换课程选择
+        function toggleCourse(course, card) {
+            if (card.classList.contains('selected')) {
+                // 取消选择
+                card.classList.remove('selected');
+                gameState.selectedItems = gameState.selectedItems.filter(item => item.id !== course.id);
+            } else {
+                // 检查是否已选满
+                if (gameState.selectedItems.length >= gameState.maxSelectionsPerWeek) {
+                    showMessage("⚠️ 本周已选满5项，请先取消部分选择。");
+                    return;
+                }
+                // 添加选择
+                card.classList.add('selected');
+                gameState.selectedItems.push({
+                    id: course.id,
+                    type: course.type,
+                    name: course.name,
+                    points: course.points,
+                    description: course.description,
+                    level: course.level,
+                    requiredTimes: course.requiredTimes || 1,
+                    itemType: 'course'
+                });
+            }
+
+            updateSelectionUI();
+        }
+
+        // 更新选择UI
+        function updateSelectionUI() {
+            const container = document.getElementById('selectedCourses');
+            const counter = document.getElementById('selectionCount');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            container.innerHTML = '';
+            gameState.selectedItems.forEach(item => {
+                const tag = document.createElement('div');
+                tag.className = 'selected-tag';
+                const icon = item.itemType === 'activity' ? (item.icon || '🎯') : '';
+                tag.innerHTML = `
+                    ${icon} ${item.name}
+                    <span class="remove-btn" onclick="removeItem('${item.id}')">×</span>
+                `;
+                container.appendChild(tag);
+            });
+
+            counter.textContent = gameState.selectedItems.length;
+            // 只要选择了至少1项就可以确认
+            confirmBtn.disabled = gameState.selectedItems.length === 0;
+        }
+
+        // 移除选择项
+        function removeItem(itemId) {
+            const card = document.querySelector(`.course-card[data-id="${itemId}"]`);
+            if (card) {
+                card.classList.remove('selected');
+            }
+            gameState.selectedItems = gameState.selectedItems.filter(item => item.id !== itemId);
+            updateSelectionUI();
+        }
+        
+        // 兼容旧函数名
+        function removeCourse(courseId) {
+            removeItem(courseId);
+        }
+
+        // 确认本周课程
+        function confirmWeek() {
+            if (gameState.selectedItems.length === 0) return;
+
+            // 记录本周变化前的属性
+            const oldStats = { ...gameState.stats };
+            const currentWeek = gameState.week;
+
+            // 图标映射
+            const courseIcons = {
+                political: '📕',
+                military: '⚔️',
+                labor: '🔨',
+                mass: '👥'
+            };
+
+            // 分离课程和活动
+            const courses = gameState.selectedItems.filter(item => item.itemType === 'course');
+            const activities = gameState.selectedItems.filter(item => item.itemType === 'activity');
+
+            // 存储本周摘要信息
+            const summaryItems = [];
+
+            // 处理课程
+            courses.forEach(course => {
+                // 增加属性
+                gameState.stats[course.type] += course.points;
+                
+                // 更新学习进度
+                const requiredTimes = course.requiredTimes || 1;
+                gameState.courseProgress[course.id] = (gameState.courseProgress[course.id] || 0) + 1;
+                const currentProgress = gameState.courseProgress[course.id];
+                
+                // 判断是否完成课程
+                const isCompleted = currentProgress >= requiredTimes;
+                if (isCompleted && !gameState.completedCourseIds.includes(course.id)) {
+                    gameState.completedCourseIds.push(course.id);
+                }
+
+                // 生成摘要描述
+                let progressText = '';
+                if (requiredTimes > 1) {
+                    if (isCompleted) {
+                        progressText = ' 【已完全掌握！】';
+                    } else {
+                        progressText = ` 【进度: ${currentProgress}/${requiredTimes}】`;
+                    }
+                }
+
+                summaryItems.push({
+                    icon: courseIcons[course.type],
+                    name: course.name,
+                    description: course.description + progressText,
+                    type: course.type,
+                    effect: `+${course.points} ${statNames[course.type]}`,
+                    isPositive: true
+                });
+            });
+
+            // 处理活动
+            activities.forEach(activity => {
+                // 应用活动效果
+                Object.entries(activity.effect).forEach(([stat, value]) => {
+                    gameState.stats[stat] += value;
+                });
+
+                // 生成效果描述
+                const effectText = Object.entries(activity.effect).map(([stat, value]) => {
+                    const sign = value > 0 ? '+' : '';
+                    return `${sign}${value} ${statNames[stat]}`;
+                }).join(', ');
+
+                summaryItems.push({
+                    icon: activity.icon,
+                    name: activity.name,
+                    description: activity.description,
+                    type: 'activity',
+                    effect: effectText,
+                    isPositive: false
+                });
+            });
+
+            // 限制属性最大最小值
+            Object.keys(gameState.stats).forEach(key => {
+                if (gameState.stats[key] > gameState.maxStat) {
+                    gameState.stats[key] = gameState.maxStat;
+                }
+                if (gameState.stats[key] < gameState.minStat) {
+                    gameState.stats[key] = gameState.minStat;
+                }
+            });
+
+            // 显示学习总结弹窗
+            document.getElementById('summaryWeekBadge').textContent = `第 ${currentWeek} 周`;
+            
+            // 渲染课程列表
+            const coursesContainer = document.getElementById('summaryCourses');
+            coursesContainer.innerHTML = '';
+            summaryItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `summary-course-item ${item.type}`;
+                div.innerHTML = `
+                    <div class="summary-course-icon ${item.type}">${item.icon}</div>
+                    <div class="summary-course-content">
+                        <div class="summary-course-name">${item.name}</div>
+                        <div class="summary-course-desc">${item.description}</div>
+                    </div>
+                    <div class="summary-course-points ${item.isPositive ? '' : 'activity-effect-summary'}">${item.effect}</div>
+                `;
+                coursesContainer.appendChild(div);
+            });
+
+            // 渲染属性变化
+            const statsContainer = document.getElementById('summaryStats');
+            statsContainer.innerHTML = '';
+            Object.keys(gameState.stats).forEach(type => {
+                const change = gameState.stats[type] - oldStats[type];
+                const stat = document.createElement('div');
+                stat.className = 'summary-stat';
+                const changeClass = change > 0 ? 'positive' : (change < 0 ? 'negative' : '');
+                const changeText = change > 0 ? '+' + change : change;
+                stat.innerHTML = `
+                    <div class="summary-stat-value">${gameState.stats[type]}</div>
+                    <div class="summary-stat-change ${changeClass}">${changeText}</div>
+                    <div class="summary-stat-name">${statNames[type]}</div>
+                `;
+                statsContainer.appendChild(stat);
+            });
+
+            // 显示弹窗
+            document.getElementById('summaryModal').classList.add('show');
+
+            // 更新底部消息
+            showMessage(`📅 第${currentWeek}周完成！请查看本周总结。`);
+
+            // 清除选择
+            gameState.selectedItems = [];
+            document.querySelectorAll('.course-card.selected').forEach(card => {
+                card.classList.remove('selected');
+            });
+            updateSelectionUI();
+
+            // 每周都触发随机事件
+            gameState.pendingRandomEvent = true;
+
+            // 进入下一周
+            gameState.week++;
+            
+            updateUI();
+        }
+
+        // 关闭学习总结弹窗
+        function closeSummary() {
+            document.getElementById('summaryModal').classList.remove('show');
+
+            // 检查游戏是否结束
+            if (gameState.week > gameState.maxWeeks) {
+                setTimeout(() => showEnding(), 500);
+                return;
+            }
+
+            // 检查是否触发随机事件
+            if (gameState.pendingRandomEvent) {
+                gameState.pendingRandomEvent = false;
+                setTimeout(() => {
+                    triggerRandomEvent();
+                    // 事件结束后重新生成课程
+                }, 300);
+            } else {
+                // 生成下一周课程
+                generateWeeklyCourses();
+                renderCourses();
+            }
+        }
+
+        // 事件结束后调用
+        function afterEventClosed() {
+            generateWeeklyCourses();
+            renderCourses();
+        }
+
+        // 当前事件
+        let currentEvent = null;
+
+        // 触发随机事件
+        function triggerRandomEvent() {
+            currentEvent = randomEvents[Math.floor(Math.random() * randomEvents.length)];
+            
+            const statNames = {
+                political: '政治素养',
+                military: '军事能力',
+                labor: '劳动技能',
+                mass: '群众工作'
+            };
+
+            document.getElementById('eventIcon').textContent = currentEvent.icon;
+            document.getElementById('eventTitle').textContent = currentEvent.title;
+            document.getElementById('eventDescription').textContent = currentEvent.description;
+            document.getElementById('eventQuestion').textContent = '你会怎么做？';
+
+            // 渲染选项
+            const choicesContainer = document.getElementById('eventChoices');
+            choicesContainer.innerHTML = '';
+            
+            currentEvent.choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = `event-choice-btn ${choice.type}`;
+                
+                // 生成效果文本
+                const effectText = Object.entries(choice.effect)
+                    .map(([stat, value]) => `<span class="${stat}-effect">+${value} ${statNames[stat]}</span>`)
+                    .join(' ');
+
+                btn.innerHTML = `
+                    <div class="choice-text">
+                        <span class="choice-icon">${choice.icon}</span>
+                        ${choice.text}
+                    </div>
+                    <div class="choice-effect">${effectText}</div>
+                `;
+                btn.onclick = () => selectEventChoice(index);
+                choicesContainer.appendChild(btn);
+            });
+
+            document.getElementById('eventModal').classList.add('show');
+        }
+
+        // 选择事件选项
+        function selectEventChoice(choiceIndex) {
+            const choice = currentEvent.choices[choiceIndex];
+            
+            const statNames = {
+                political: '政治素养',
+                military: '军事能力',
+                labor: '劳动技能',
+                mass: '群众工作'
+            };
+
+            // 应用效果
+            Object.keys(choice.effect).forEach(stat => {
+                gameState.stats[stat] += choice.effect[stat];
+                if (gameState.stats[stat] > gameState.maxStat) {
+                    gameState.stats[stat] = gameState.maxStat;
+                }
+            });
+
+            // 禁用所有选项按钮
+            document.querySelectorAll('.event-choice-btn').forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'default';
+            });
+
+            // 高亮选中的选项
+            const selectedBtn = document.querySelectorAll('.event-choice-btn')[choiceIndex];
+            selectedBtn.style.opacity = '1';
+            selectedBtn.style.background = 'linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1))';
+            selectedBtn.style.borderColor = 'var(--gold-primary)';
+
+            // 生成效果文本
+            const effectText = Object.entries(choice.effect)
+                .map(([stat, value]) => `${statNames[stat]} +${value}`)
+                .join('，');
+
+            // 显示结果
+            document.getElementById('eventQuestion').innerHTML = `
+                <div class="event-result show">
+                    <div class="result-text">${choice.result}</div>
+                    <div class="result-effect">🎉 ${effectText}</div>
+                </div>
+                <button class="event-continue-btn show" onclick="closeEvent()">继续学习 →</button>
+            `;
+
+            updateUI();
+        }
+
+        // 关闭事件
+        function closeEvent() {
+            document.getElementById('eventModal').classList.remove('show');
+            currentEvent = null;
+            // 生成下一周课程
+            afterEventClosed();
+        }
+
+        // 更新UI
+        function updateUI() {
+            // 更新周数
+            document.getElementById('currentWeek').textContent = Math.min(gameState.week, gameState.maxWeeks);
+
+            // 更新进度环
+            const progress = (gameState.week - 1) / gameState.maxWeeks;
+            const circumference = 157; // 2 * PI * 25
+            const offset = circumference * (1 - progress);
+            document.getElementById('progressCircle').style.strokeDashoffset = offset;
+
+            // 更新属性
+            const statTypes = ['political', 'military', 'labor', 'mass'];
+            statTypes.forEach(type => {
+                const value = gameState.stats[type];
+                const percent = (value / gameState.maxStat) * 100;
+                document.getElementById(`${type}Value`).textContent = value;
+                document.getElementById(`${type}Bar`).style.width = `${percent}%`;
+            });
+        }
+
+        // 显示消息
+        function showMessage(msg) {
+            document.getElementById('messageContent').innerHTML = msg.replace(/\n/g, '<br>');
+        }
+
+        // 显示结局
+        function showEnding() {
+            const stats = gameState.stats;
+            const maxStat = Math.max(stats.political, stats.military, stats.labor, stats.mass);
+            
+            let endingType = 'balanced';
+            const threshold = 10; // 差距阈值
+
+            if (stats.political === maxStat && stats.political - Math.min(stats.military, stats.labor, stats.mass) > threshold) {
+                endingType = 'political';
+            } else if (stats.military === maxStat && stats.military - Math.min(stats.political, stats.labor, stats.mass) > threshold) {
+                endingType = 'military';
+            } else if (stats.labor === maxStat && stats.labor - Math.min(stats.political, stats.military, stats.mass) > threshold) {
+                endingType = 'labor';
+            } else if (stats.mass === maxStat && stats.mass - Math.min(stats.political, stats.military, stats.labor) > threshold) {
+                endingType = 'mass';
+            }
+
+            const ending = endings[endingType];
+
+            document.getElementById('endingIcon').textContent = ending.icon;
+            document.getElementById('endingIdentity').textContent = ending.title;
+            document.getElementById('endingDescription').textContent = ending.description;
+
+            // 显示最终属性
+            const finalStats = document.getElementById('finalStats');
+            finalStats.innerHTML = `
+                <div class="final-stat">
+                    <div class="final-stat-value">${stats.political}</div>
+                    <div class="final-stat-name">政治素养</div>
+                </div>
+                <div class="final-stat">
+                    <div class="final-stat-value">${stats.military}</div>
+                    <div class="final-stat-name">军事能力</div>
+                </div>
+                <div class="final-stat">
+                    <div class="final-stat-value">${stats.labor}</div>
+                    <div class="final-stat-name">劳动技能</div>
+                </div>
+                <div class="final-stat">
+                    <div class="final-stat-value">${stats.mass}</div>
+                    <div class="final-stat-name">群众工作</div>
+                </div>
+            `;
+
+            document.getElementById('endingScreen').classList.add('show');
+        }
+
+        // 开始游戏
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+        }
+
+        // 重新开始
+        function restartGame() {
+            gameState = {
+                week: 1,
+                maxWeeks: 8,
+                maxSelectionsPerWeek: 5,
+                stats: {
+                    political: 10,
+                    military: 10,
+                    labor: 10,
+                    mass: 10
+                },
+                maxStat: 100,
+                minStat: 0,
+                selectedItems: [],
+                completedCourseIds: [],
+                courseProgress: {},
+                pendingRandomEvent: false,
+                weeklyAvailableCourses: []
+            };
+
+            document.getElementById('endingScreen').classList.remove('show');
+            document.getElementById('startScreen').classList.remove('hidden');
+            
+            generateWeeklyCourses();
+            renderCourses();
+            updateSelectionUI();
+            updateUI();
+        }
+
+        // 页面加载完成后初始化
+        window.onload = initGame;
+    </script>
+</body>
+</html>
+
